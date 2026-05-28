@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# %name: Preview SDDM ADArt Matugener
+# %desc: Preview the installed sddm-adart-matugener SDDM theme
+# %icon: view-preview
+# %terminal: true
+# %categories: Utility;System;Theme;
+# %mode: cli
+# %default_args:
+# %prompt:
+# %prompt_type: none
+# %tags: sddm preview adart astronaut theme
+#
+# @packageDocumentation
+# Runs the SDDM greeter in test mode for sddm-adart-matugener.
+# This is safer than discovering QML errors at the actual login screen,
+# where the machine can judge you without witnesses.
+
+set -euo pipefail
+
+theme_name="sddm-adart-matugener"
+theme_dir="/usr/share/sddm/themes/$theme_name"
+
+usage() {
+  cat <<'EOF'
+Usage:
+  scripts/preview-theme [theme-dir]
+
+Default theme dir:
+  /usr/share/sddm/themes/sddm-adart-matugener
+EOF
+}
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  usage
+  exit 0
+fi
+
+if [[ $# -gt 0 ]]; then
+  theme_dir="$1"
+fi
+
+if [[ ! -d "$theme_dir" ]]; then
+  echo "Theme directory not found: $theme_dir" >&2
+  echo "Run scripts/install first." >&2
+  exit 1
+fi
+
+if [[ ! -f "$theme_dir/Main.qml" ]]; then
+  echo "Main.qml not found in theme directory: $theme_dir" >&2
+  exit 1
+fi
+
+if command -v sddm-greeter-qt6 >/dev/null 2>&1; then
+  exec sddm-greeter-qt6 --test-mode --theme "$theme_dir"
+elif command -v sddm-greeter >/dev/null 2>&1; then
+  exec sddm-greeter --test-mode --theme "$theme_dir"
+else
+  echo "No SDDM greeter preview command found." >&2
+  echo "Expected one of: sddm-greeter-qt6, sddm-greeter" >&2
+  exit 1
+fi

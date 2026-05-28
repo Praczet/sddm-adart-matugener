@@ -1,0 +1,4 @@
+
+[templates.sddm-adart-matugener-theme]
+input_path = '~/.config/matugen/templates/sddm-adart-matugener-theme.conf'
+output_path = '/usr/local/share/sddm-adart-matugener/theme.conf'

@@ -1,0 +1,280 @@
+#!/usr/bin/env bash
+# %name: Install SDDM ADArt Matugener
+# %desc: Install the sddm-adart-matugener theme and prepare mutable runtime files
+# %icon: preferences-desktop-theme
+# %terminal: true
+# %categories: Utility;System;Theme;
+# %mode: cli
+# %default_args:
+# %prompt:
+# %prompt_type: none
+# %tags: sddm matugen adart astronaut theme installer
+#
+# @packageDocumentation
+# Installs the static SDDM theme into /usr/share/sddm/themes and prepares
+# the mutable runtime directory in /usr/local/share/sddm-adart-matugener.
+#
+# The installed theme is based on sddm-astronaut-theme and expects:
+#   Background="Backgrounds/adart-current.png"
+#
+# That file is a symlink:
+#   /usr/share/sddm/themes/sddm-adart-matugener/Backgrounds/adart-current.png
+#     -> /usr/local/share/sddm-adart-matugener/background.png
+#
+# The first installed background is:
+#   theme/Backgrounds/adart-woman-reading.png
+
+set -euo pipefail
+
+theme_name="sddm-adart-matugener"
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+project_root="$(cd -- "$script_dir/.." && pwd)"
+
+theme_src="$project_root/theme"
+theme_dst="/usr/share/sddm/themes/$theme_name"
+
+runtime_dir="/usr/local/share/$theme_name"
+runtime_background="$runtime_dir/background.png"
+runtime_theme_conf="$runtime_dir/theme.conf"
+
+default_background="$theme_src/Backgrounds/adart-woman-reading.png"
+
+sddm_conf="/etc/sddm.conf.d/20-sddm-adart-matugener.conf"
+
+enable_theme=true
+force_runtime=false
+
+usage() {
+  cat <<'EOF'
+Usage:
+  scripts/install [options]
+
+Options:
+  --no-enable       Install files, but do not set SDDM's current theme.
+  --force-runtime   Overwrite runtime background.png and theme.conf.
+  -h, --help        Show this help.
+
+What it installs:
+  static theme:
+    /usr/share/sddm/themes/sddm-adart-matugener
+
+  mutable runtime files:
+    /usr/local/share/sddm-adart-matugener/background.png
+    /usr/local/share/sddm-adart-matugener/theme.conf
+
+The initial runtime background is copied from:
+  theme/Backgrounds/adart-woman-reading.png
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --no-enable)
+      enable_theme=false
+      shift
+      ;;
+    --force-runtime)
+      force_runtime=true
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+done
+
+require_file() {
+  local file="$1"
+  local label="$2"
+
+  if [[ ! -f "$file" ]]; then
+    echo "Missing $label: $file" >&2
+    exit 1
+  fi
+}
+
+require_dir() {
+  local dir="$1"
+  local label="$2"
+
+  if [[ ! -d "$dir" ]]; then
+    echo "Missing $label: $dir" >&2
+    exit 1
+  fi
+}
+
+require_dir "$theme_src" "theme source directory"
+require_file "$theme_src/Main.qml" "Main.qml"
+require_file "$theme_src/metadata.desktop" "metadata.desktop"
+require_file "$default_background" "default background"
+
+echo "Installing $theme_name"
+echo "  project: $project_root"
+echo "  theme:   $theme_src -> $theme_dst"
+echo "  runtime: $runtime_dir"
+echo
+
+# Runtime directory is intentionally user-writable after setup because Matugen
+# and wallpaper scripts run as the normal user.
+sudo install -d -m 0755 "$runtime_dir"
+sudo chown "$USER:$USER" "$runtime_dir"
+
+if [[ "$force_runtime" == true || ! -f "$runtime_background" ]]; then
+  install -m 0644 "$default_background" "$runtime_background"
+  echo "Installed initial runtime background:"
+  echo "  $runtime_background"
+else
+  echo "Keeping existing runtime background:"
+  echo "  $runtime_background"
+fi
+
+if [[ "$force_runtime" == true || ! -f "$runtime_theme_conf" ]]; then
+  cat > "$runtime_theme_conf" <<'EOF'
+[General]
+ScreenWidth="1920"
+ScreenHeight="1080"
+ScreenPadding=""
+
+Font="Open Sans"
+FontSize="13"
+KeyboardSize="0.4"
+RoundCorners="20"
+
+Locale=""
+HourFormat="HH:mm"
+DateFormat="dddd d MMMM"
+
+HeaderText=""
+
+BackgroundPlaceholder=""
+Background="Backgrounds/adart-current.png"
+BackgroundSpeed=""
+PauseBackground=""
+DimBackground="0.0"
+CropBackground="true"
+BackgroundHorizontalAlignment="center"
+BackgroundVerticalAlignment="center"
+
+HeaderTextColor="#ffffff"
+DateTextColor="#ffffff"
+TimeTextColor="#ffffff"
+
+FormBackgroundColor="#21222C"
+BackgroundColor="#21222C"
+DimBackgroundColor="#21222C"
+
+LoginFieldBackgroundColor="#222222"
+PasswordFieldBackgroundColor="#222222"
+LoginFieldTextColor="#ffffff"
+PasswordFieldTextColor="#ffffff"
+
+UserIconColor="#ffffff"
+PasswordIconColor="#ffffff"
+
+PlaceholderTextColor="#bbbbbb"
+WarningColor="#ff757f"
+
+LoginButtonTextColor="#ffffff"
+LoginButtonBackgroundColor="#343746"
+
+SystemButtonsIconsColor="#F8F8F2"
+SessionButtonTextColor="#F8F8F2"
+VirtualKeyboardButtonTextColor="#F8F8F2"
+
+DropdownTextColor="#ffffff"
+DropdownSelectedBackgroundColor="#343746"
+DropdownBackgroundColor="#21222C"
+
+HighlightTextColor="#bbbbbb"
+HighlightBackgroundColor="#343746"
+HighlightBorderColor="#343746"
+
+HoverUserIconColor="#b7cef1"
+HoverPasswordIconColor="#b7cef1"
+HoverSystemButtonsIconsColor="#b7cef1"
+HoverSessionButtonTextColor="#b7cef1"
+HoverVirtualKeyboardButtonTextColor="#b7cef1"
+
+PartialBlur="true"
+FullBlur=""
+BlurMax=""
+Blur=""
+
+HaveFormBackground="false"
+
+FormPosition="center"
+VirtualKeyboardPosition="center"
+
+HideVirtualKeyboard="false"
+HideSystemButtons="false"
+HideLoginButton="false"
+
+ForceLastUser="true"
+PasswordFocus="true"
+HideCompletePassword="true"
+AllowEmptyPassword="false"
+AllowUppercaseLettersInUsernames="false"
+BypassSystemButtonsChecks="false"
+RightToLeftLayout="false"
+
+TranslatePlaceholderUsername=""
+TranslatePlaceholderPassword=""
+TranslateLogin=""
+TranslateLoginFailedWarning=""
+TranslateCapslockWarning=""
+TranslateSuspend=""
+TranslateHibernate=""
+TranslateReboot=""
+TranslateShutdown=""
+TranslateSessionSelection=""
+TranslateVirtualKeyboardButtonOn=""
+TranslateVirtualKeyboardButtonOff=""
+EOF
+  chmod 0644 "$runtime_theme_conf"
+  echo "Installed initial runtime theme.conf:"
+  echo "  $runtime_theme_conf"
+else
+  echo "Keeping existing runtime theme.conf:"
+  echo "  $runtime_theme_conf"
+fi
+
+# Install static theme. cp -a preserves symlinks from the project tree.
+sudo rm -rf "$theme_dst"
+sudo install -d -m 0755 "$(dirname "$theme_dst")"
+sudo cp -a "$theme_src" "$theme_dst"
+
+# Ensure the symlinks exist in the installed theme, even if the source tree
+# was copied without them for some reason.
+sudo install -d -m 0755 "$theme_dst/Backgrounds"
+sudo ln -sfn "$runtime_background" "$theme_dst/Backgrounds/adart-current.png"
+sudo ln -sfn "$runtime_theme_conf" "$theme_dst/theme.conf"
+
+# Root-owned static theme files. Use -h so symlinks themselves are owned,
+# not their targets.
+sudo chown -hR root:root "$theme_dst"
+sudo find "$theme_dst" -type d -exec chmod 0755 {} +
+sudo find "$theme_dst" -type f -exec chmod 0644 {} +
+
+if [[ "$enable_theme" == true ]]; then
+  sudo install -d -m 0755 "$(dirname "$sddm_conf")"
+  sudo tee "$sddm_conf" >/dev/null <<EOF
+[Theme]
+Current=$theme_name
+EOF
+  echo "Enabled SDDM theme:"
+  echo "  $sddm_conf"
+else
+  echo "Skipped SDDM theme enable step."
+fi
+
+echo
+echo "Installed."
+echo
+echo "Preview with:"
+echo "  $project_root/scripts/preview-theme"
