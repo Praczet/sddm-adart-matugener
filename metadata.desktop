@@ -1,0 +1,11 @@
+[SddmGreeterTheme]
+Name=sddm-adart-matugener
+Description=ADArt Matugen-friendly SDDM theme based on sddm-astronaut-theme
+Author=Adam Druzd
+License=GPL-3.0-or-later
+Type=sddm-theme
+Version=0.1.0
+MainScript=Main.qml
+ConfigFile=theme.conf
+Theme-Id=sddm-adart-matugener
+Theme-API=2.0
