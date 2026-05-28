@@ -69,23 +69,23 @@ EOF
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --no-enable)
-      enable_theme=false
-      shift
-      ;;
-    --force-runtime)
-      force_runtime=true
-      shift
-      ;;
-    -h|--help)
-      usage
-      exit 0
-      ;;
-    *)
-      echo "Unknown argument: $1" >&2
-      usage >&2
-      exit 2
-      ;;
+  --no-enable)
+    enable_theme=false
+    shift
+    ;;
+  --force-runtime)
+    force_runtime=true
+    shift
+    ;;
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  *)
+    echo "Unknown argument: $1" >&2
+    usage >&2
+    exit 2
+    ;;
   esac
 done
 
@@ -135,7 +135,7 @@ else
 fi
 
 if [[ "$force_runtime" == true || ! -f "$runtime_theme_conf" ]]; then
-  cat > "$runtime_theme_conf" <<'EOF'
+  cat >"$runtime_theme_conf" <<'EOF'
 [General]
 ScreenWidth="1920"
 ScreenHeight="1080"
