@@ -1,11 +1,15 @@
 # sddm-adart-matugener
 
+<img width="2030" height="1200" alt="image" src="https://github.com/user-attachments/assets/24bd99f1-ce8d-4dd4-955a-ac8d85c18f25" />
+
+
+
 A Matugen-wired SDDM theme based totally, fully, and with both hands on
 [`sddm-astronaut-theme`](https://github.com/Keyitdev/sddm-astronaut-theme).
 
 The clock, login layout, input styling, icons, fonts, system buttons, virtual keyboard
 handling, and general “yes, this looks like an actual login screen” part come from
-Astronaut. This project adds ADArt-specific wiring around it:
+Astronaut. I added ADArt-specific wiring around it:
 
 - Matugen-generated `theme.conf`
 - mutable background handling
@@ -19,12 +23,12 @@ In other words: this is Astronaut with plumbing. Glamorous, like most plumbing.
 > ## Credit
 >
 > This project is derived from `sddm-astronaut-theme`.
-> Keep the upstream license and credit intact. Do not pretend the pretty QML grew here
+> I keep the upstream license and credit intact. I do not pretend the pretty QML grew here
 > naturally after rainfall.
 
 ## Why
 
-The original Astronaut theme already has the thing we want:
+The original Astronaut theme already has the thing I want:
 
 - a big clock
 - nice date formatting
@@ -34,7 +38,7 @@ The original Astronaut theme already has the thing we want:
 - virtual keyboard support
 - a good full-screen composition
 
-So this project does **not** try to reimplement that. We tried. It worked like a
+So this project does **not** try to reimplement that. I tried. It worked like a
 rectangle wearing a helmet.
 
 Instead, this project keeps the Astronaut layout and changes how the mutable parts
@@ -50,7 +54,7 @@ Background="Backgrounds/astronaut.png"
 
 and the path must be relative to the theme directory.
 
-This project keeps that rule and uses:
+I keep that rule and use:
 
 ```ini
 Background="Backgrounds/adart-current.png"
@@ -63,7 +67,7 @@ Background="Backgrounds/adart-current.png"
   -> /usr/local/share/sddm-adart-matugener/background.png
 ```
 
-So SDDM sees a relative theme background, while your wallpaper/Matugen scripts update
+So SDDM sees a relative theme background, while my wallpaper/Matugen scripts update
 the real mutable file outside `/usr/share`.
 
 ## Directory layout
@@ -234,7 +238,7 @@ The runtime background is:
 /usr/local/share/sddm-adart-matugener/background.png
 ```
 
-Your wallpaper script can update it by copying the generated Hyprlock background there:
+My wallpaper script can update it by copying the generated Hyprlock background there:
 
 ```bash
 install -m 0644 ~/.cache/hyprlock-current.png \
@@ -247,7 +251,7 @@ The theme reads it through the relative symlink:
 Backgrounds/adart-current.png
 ```
 
-because Astronaut expects a relative background path. We obey. Not happily, but we
+because Astronaut expects a relative background path. I obey. Not happily, but I
 obey.
 
 ## Useful checks
@@ -279,9 +283,9 @@ scripts/preview-theme
 
 ## License and attribution
 
-This project is based on `sddm-astronaut-theme`.
+This project is based on `sddm-astronaut-theme`, and I want that to be obvious rather than hidden in the basement.
 
-Keep the upstream license file with the theme and preserve attribution in this README.
+I keep the upstream license file with the theme and preserve attribution in this README.
 The ADArt-specific parts are the Matugen/runtime wiring and helper scripts.
 
 ## Name
@@ -290,3 +294,4 @@ The ADArt-specific parts are the Matugen/runtime wiring and helper scripts.
 
 Because “Matugen-powered SDDM Astronaut derivative with mutable background symlink
 plumbing” would be more accurate, but less merciful.
+
