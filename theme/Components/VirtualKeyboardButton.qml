@@ -2,8 +2,8 @@
 // Copyright (C) 2022-2025 Keyitdev
 // Distributed under the GPLv3+ License https://www.gnu.org/licenses/gpl-3.0.html
 
-import QtQuick 2.15
-import QtQuick.Controls 2.15
+import QtQuick
+import QtQuick.Controls
 
 Item {
     Button {

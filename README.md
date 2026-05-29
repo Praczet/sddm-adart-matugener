@@ -2,8 +2,6 @@
 
 <img width="2030" height="1200" alt="image" src="https://github.com/user-attachments/assets/24bd99f1-ce8d-4dd4-955a-ac8d85c18f25" />
 
-
-
 A Matugen-wired SDDM theme based totally, fully, and with both hands on
 [`sddm-astronaut-theme`](https://github.com/Keyitdev/sddm-astronaut-theme).
 
@@ -20,6 +18,7 @@ Astronaut. I added ADArt-specific wiring around it:
 In other words: this is Astronaut with plumbing. Glamorous, like most plumbing.
 
 > [!IMPORTANT]
+>
 > ## Credit
 >
 > This project is derived from `sddm-astronaut-theme`.
@@ -288,10 +287,124 @@ This project is based on `sddm-astronaut-theme`, and I want that to be obvious r
 I keep the upstream license file with the theme and preserve attribution in this README.
 The ADArt-specific parts are the Matugen/runtime wiring and helper scripts.
 
+## Troubleshooting: Qt6 greeter and Wayland
+
+This theme is based on `sddm-astronaut-theme`, and it is a **Qt6 SDDM theme**. That matters more than it should, because SDDM can have both greeter binaries installed:
+
+```bash
+sddm-greeter
+sddm-greeter-qt6
+```
+
+For this theme, the useful test command is:
+
+```bash
+sddm-greeter-qt6 --test-mode --theme /usr/share/sddm/themes/sddm-adart-matugener
+```
+
+If this works, but this fails:
+
+```bash
+sddm-greeter --test-mode --theme /usr/share/sddm/themes/sddm-adart-matugener
+```
+
+that is expected. The plain `sddm-greeter` path can behave like the Qt5 greeter and may throw errors such as:
+
+```text
+Library import requires a version
+```
+
+or complain about Qt/QML modules that are not relevant to the Qt6 version of the theme. This is not the theme asking to become Qt5-compatible. It is the wrong greeter being invited to the party. Very rude, very X11.
+
+The theme metadata must contain:
+
+```ini
+QtVersion=6
+```
+
+Check it with:
+
+```bash
+grep -n "QtVersion\|MainScript\|ConfigFile\|Theme-API" \
+  /usr/share/sddm/themes/sddm-adart-matugener/metadata.desktop
+```
+
+Expected:
+
+```ini
+MainScript=Main.qml
+ConfigFile=theme.conf
+Theme-API=2.0
+QtVersion=6
+```
+
+### SDDM display server
+
+On my setup, SDDM was starting the greeter like this:
+
+```text
+Starting X11 session: "" "/usr/bin/sddm-greeter --socket ... --theme /usr/share/sddm/themes/sddm-adart-matugener"
+```
+
+That means it was using the plain greeter, not the Qt6 greeter. For this theme, I want SDDM to use the Qt6 greeter path. The practical fix is to run the SDDM greeter on Wayland.
+
+Create or edit:
+
+```bash
+sudoedit /etc/sddm.conf.d/99-display-server.conf
+```
+
+Use:
+
+```ini
+[General]
+DisplayServer=wayland
+```
+
+Check for conflicting settings:
+
+```bash
+grep -R "DisplayServer" /etc/sddm.conf /etc/sddm.conf.d 2>/dev/null
+```
+
+If another file still says:
+
+```ini
+DisplayServer=x11
+```
+
+then SDDM may continue using the X11 greeter path. The `99-...` filename is intentional: it should win over earlier config files. Computers understand order. Sometimes.
+
+### Real check after restarting SDDM
+
+The preview command is useful, but the daemon decides what happens at the real login screen. After restarting SDDM, check the journal:
+
+```bash
+journalctl -u sddm -b --no-pager | \
+  grep -Ei "Starting .*greeter|sddm-greeter|sddm-greeter-qt6|theme|qml|error"
+```
+
+What I want to see is SDDM using the Qt6 greeter path, not the old plain greeter path.
+
+### Safe preview
+
+Before restarting SDDM, always test with:
+
+```bash
+sddm-greeter-qt6 --test-mode --theme /usr/share/sddm/themes/sddm-adart-matugener
+```
+
+This can show:
+
+```text
+Socket error: "QLocalSocket::connectToServer: Invalid name"
+```
+
+In test mode, that warning is usually harmless. Preview mode is not a full SDDM login session, so some socket/session pieces are fake. The greeter complains because apparently even previews need drama.
+
 ## Name
 
 `sddm-adart-matugener`
 
 Because “Matugen-powered SDDM Astronaut derivative with mutable background symlink
 plumbing” would be more accurate, but less merciful.
-

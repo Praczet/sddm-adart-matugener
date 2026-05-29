@@ -3,9 +3,9 @@
 // Based on https://github.com/MarianArlt/sddm-sugar-dark
 // Distributed under the GPLv3+ License https://www.gnu.org/licenses/gpl-3.0.html
 
-import QtQuick 2.15
-import QtQuick.Layouts 1.15
-import QtQuick.Controls 2.15
+import QtQuick
+import QtQuick.Layouts
+import QtQuick.Controls
 
 Column {
     id: inputContainer
