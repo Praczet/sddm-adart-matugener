@@ -80,7 +80,10 @@ sddm-adart-matugener/
 │   └── sddm-adart-matugener-theme.conf
 ├── scripts/
 │   ├── install
-│   └── preview-theme
+│   ├── install-user-helpers
+│   ├── preview-theme
+│   ├── sddm-adart-apply
+│   └── sddm-adart-matugener
 └── theme/
     ├── Assets/
     ├── Backgrounds/
@@ -242,6 +245,14 @@ My wallpaper script can update it by copying the generated Hyprlock background t
 ```bash
 install -m 0644 ~/.cache/hyprlock-current.png \
   /usr/local/share/sddm-adart-matugener/background.png
+```
+
+`set-wallpaper` does this through two user helpers kept in this repository,
+`sddm-adart-apply` and `sddm-adart-matugener`. Link them into `~/.local/bin`
+as your user (not with sudo):
+
+```bash
+scripts/install-user-helpers
 ```
 
 The theme reads it through the relative symlink:

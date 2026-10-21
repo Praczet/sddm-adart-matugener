@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Description: Link the SDDM ADArt user helpers into ~/.local/bin.
+# Usage: scripts/install-user-helpers
+#
+# Run as your user, not with sudo: set-wallpaper calls these helpers from the
+# desktop session. scripts/install handles the system-wide theme.
+
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+bin_dir="${HOME}/.local/bin"
+
+mkdir -p "$bin_dir"
+
+for helper in sddm-adart-apply sddm-adart-matugener; do
+  ln -sfn -- "$script_dir/$helper" "$bin_dir/$helper"
+  printf 'linked %s\n' "$bin_dir/$helper"
+done

@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# %name: SDDM ADArt Apply
+# %desc: Install generated Hyprlock/Matugen files for SDDM ADArt theme
+# %icon: preferences-desktop-theme
+# %terminal: true
+# %categories: Utility;System;Theme;
+# %mode: arg
+# %default_args:
+# %prompt:
+# %prompt_type: none
+# %tags: sddm matugen adart hyprlock wallpaper
+#
+# @packageDocumentation
+# Copies the generated Hyprlock background into an SDDM-readable runtime directory.
+# Also copies Matugen-generated style.qml if it exists.
+#
+# Usage:
+#   sddm-adart-apply /path/to/hyprlock-current.png
+
+set -euo pipefail
+
+WALLPAPER="${1:-}"
+
+RUNTIME_DIR="/usr/local/share/sddm-adart-matugener"
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/matugen/sddm-adart-matugener"
+
+STYLE_SRC="$CACHE_DIR/style.qml"
+STYLE_DST="$RUNTIME_DIR/style.qml"
+
+BACKGROUND_DST="$RUNTIME_DIR/background.png"
+
+if [[ -z "$WALLPAPER" ]]; then
+  echo "Usage: sddm-adart-apply <wallpaper-image>" >&2
+  exit 1
+fi
+
+if [[ ! -f "$WALLPAPER" ]]; then
+  echo "Wallpaper not found: $WALLPAPER" >&2
+  exit 1
+fi
+
+if [[ ! -d "$RUNTIME_DIR" ]]; then
+  echo "Runtime directory missing: $RUNTIME_DIR" >&2
+  echo "Create it once with:" >&2
+  echo "  sudo install -d -m 0755 $RUNTIME_DIR" >&2
+  echo "  sudo chown \"\$USER:\$USER\" $RUNTIME_DIR" >&2
+  exit 1
+fi
+
+install -m 0644 "$WALLPAPER" "$BACKGROUND_DST"
+echo "Installed SDDM background: $BACKGROUND_DST"
+
+if [[ -f "$STYLE_SRC" ]]; then
+  install -m 0644 "$STYLE_SRC" "$STYLE_DST"
+  echo "Installed SDDM style: $STYLE_DST"
+else
+  echo "No Matugen style found at: $STYLE_SRC"
+  echo "Keeping existing SDDM style."
+fi
